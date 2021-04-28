@@ -1,44 +1,57 @@
-import React, { useState, useRef } from 'react'
+import React, { useState, useEffect } from 'react'
 import { 
 	StyleSheet, 
 	Text, 
 	View, 
-	TouchableOpacity, 
 	TextInput, 
 	SafeAreaView,
-	Keyboard 
 } from 'react-native'
 
 import api from './src/services/api'
 
 export default function App() {
 
-	const [cep, setCep] = useState('')
-	const inputRef = useRef(null)
-	const [cepUser, setCepUser] = useState(null)
+	const [zipcode, setZipcode] = useState('')
+	const [state, setState] = useState('') //estate
+	const [city, setCity] = useState('') //city
+	const [validZipcode, setValidZipcode] = useState(false)
+       
+    const [street, setStreet] = useState(undefined)
+    const [district, setDistrict] = useState('')
 
+
+	useEffect(() => {
+		(async() => {
+			if(zipcode.length == 8){
+				try{
+					const response = await api.get(`/${zipcode}/json`)
+					setValidZipcode(true) 
+					setState(response.data.uf) //setando as informacoes que chegaram da api
+					setCity(response.data.localidade)
+					setStreet(response.data.logradouro)
+					setDistrict(response.data.bairro)	
+					// if(validZipcode === true){
+					// 	Keyboard.dismiss()
+					// }		
+				}
+				catch(error) {
+					console.log('ERROR: ' + error)
+				}	
+			}
+			else if(typeof (zipcode) == 'undefined'){
+				console.warn('CEP erradasso')
+			}
+			else {
+				console.log('CEP INVALIDO')
+				setValidZipcode(false) 
+				setStreet('')
+				setDistrict('')
+				setState('')
+			}
+			
+		})()
+	  })
 	
-	async function buscar(){
-		if(cep == ''){
-			alert('Digite um cep valido')
-			return;
-		}
-		
-		try{
-			const response = await api.get(`/${cep}/json`)
-			Keyboard.dismiss() //garantir que o teclado sera fechado
-			setCepUser(response.data) //setando as informacoes que chegaram da api
-			// console.warn(response.data)
-		}catch(error) {
-			console.log('ERROR: ' + error)
-		}	
-	}
-	
-	function limpar(){
-		setCep('')
-		inputRef.current.focus()
-		setCepUser(null)
-	}
 
 	return (
 		<SafeAreaView style={styles.container}>
@@ -47,39 +60,23 @@ export default function App() {
 				<TextInput 
 					style={styles.input}
 					placeholder="Ex 79003241"
-					value={cep}
-					onChangeText={ (texto) => setCep(texto) }
+					value={zipcode}
+					onChangeText={ (texto) => setZipcode(texto) }
 					keyboardType="numeric"
-					ref={inputRef}
+					
 				/>
 			</View>
-
-			<View style={styles.areaBtn}>
-				<TouchableOpacity 
-					style={[styles.botao, {backgroundColor: '#1d75cd'}]}
-					onPress={buscar}
-				>
-					<Text style={styles.botaoText}>Buscar</Text>
-				</TouchableOpacity>
-				<TouchableOpacity 
-					style={[styles.botao, {backgroundColor: '#cd3e1d'}]}
-					onPress={limpar}
-				>
-					<Text style={styles.botaoText}>Limpar</Text>
-				</TouchableOpacity>
-			</View>
-
-			{ cepUser && 
+		
+			{ validZipcode && 
 				<View style={styles.resultado}>
-					<Text style={styles.itemText}>CEP: {cepUser.cep}</Text>
-					<Text style={styles.itemText}>Logradouro: {cepUser.logradouro}</Text>
-					<Text style={styles.itemText}>Bairro: {cepUser.bairro}</Text>
-					<Text style={styles.itemText}>Cidade: {cepUser.localidade}</Text>
-					<Text style={styles.itemText}>Estado: {cepUser.uf}</Text>
+					<Text style={styles.itemText}>CEP: {zipcode}</Text>
+					<Text style={styles.itemText}>Rua: {street}</Text>
+					<Text style={styles.itemText}>Bairro: {district}</Text>
+					<Text style={styles.itemText}>Cidade: {city}</Text>
+					<Text style={styles.itemText}>Estado: {state}</Text>
 				</View>
 			}
 			
-
 		</SafeAreaView>
   );
 }
