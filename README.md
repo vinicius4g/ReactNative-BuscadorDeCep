@@ -4,7 +4,7 @@
 
 ## 💻 Projeto
 
-App feito para buscar a localidade pelo CEP.
+App feito para buscar a rua, bairro, cidade e estado pelo CEP digitado.
 
 
 ## 🔨 Techs
