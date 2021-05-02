@@ -19,6 +19,6 @@ Esse projeto foi desenvolvido com as seguintes tecnologias:
 ## 🚀 Como executar
 
 - Clone o repositório
-- Rode `npm instal` para instalar as dependências.
+- Rode `npm install` para instalar as dependências.
 - Rode o `npm start` ou `expo start` para iniciar a aplicação.
 
